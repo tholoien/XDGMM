@@ -13,6 +13,7 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
+  - conda install numpy
   - pip install -r requirements.txt
   - python setup.py
 
