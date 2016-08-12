@@ -1,6 +1,6 @@
-numpy
 scikit-learn
-scipy
 nose
-astroML
 astroML_addons
+astroML
+scipy
+numpy
