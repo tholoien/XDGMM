@@ -1,5 +1,5 @@
 scipy
 scikit-learn
-nosetests
+nose
 astroML
 astroML_addons
