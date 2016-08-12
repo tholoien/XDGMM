@@ -3,4 +3,3 @@ nose
 astroML_addons
 astroML
 scipy
-numpy
