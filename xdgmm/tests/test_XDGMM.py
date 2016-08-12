@@ -14,5 +14,14 @@ class XDGMMTestCase(unittest.TestCase):
             """
         self.xdgmm = XDGMM(n_components=1)
 
+    def test_Fit(self):
+        this_mu=self.xdgmm.mu
+        this_V=self.xdgmm.V
+        this_weights=self.xdgmm.weights
+
+        # self.xdgmm.fit()
+
+#        self.assertNotEqual(this_mu[0],self.xdgmm.mu[0])
+
 if __name__ == '__main__':
     unittest.main()
