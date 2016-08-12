@@ -1,8 +1,8 @@
 from setuptools import setup
+import xdgmm
 
 setup(
     name="xdgmm",
-    version=xdgmm.__version__,
     author="Tom Holoien",
     author_email="tholoien@gmail.com",
     url="https://github.com/tholoien/XDGMM",
