@@ -1,0 +1,5 @@
+scipy
+scikit-learn
+nosetests
+astroML
+astroML_addons
