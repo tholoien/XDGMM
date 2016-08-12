@@ -44,7 +44,8 @@ class XDGMM(BaseEstimator):
 
     Notes
     -----
-    This implementation follows Bovy et al. arXiv 0905.2979
+    This implementation uses the astroML (http://www.astroml.org/) and Bovy et al. (arXiv 0905.2979) algorithms.
+    This class extends the BaseEstimator class from scikit-learn and implements the necessary methods for cross-validation.
     """
 	def __init__(self, n_components, n_iter=100, tol=1E-5, method='astroML', V=None, mu=None, weights=None, verbose=False, random_state = None):         
 		self.n_components = n_components
@@ -54,6 +55,7 @@ class XDGMM(BaseEstimator):
 		self.random_state = random_state
 		self.method=method
 		
+		#Bovy method needs to be implemented.
 		if method=='Bovy': raise NotImplementedError("Bovy fitting method is not yet implemented")
 
         # model parameters: these are set by the fit() method but can be set at initialization
@@ -61,10 +63,23 @@ class XDGMM(BaseEstimator):
 		self.mu = mu
 		self.weights = weights
 		
-		#astroML XDGMM object that will be used for sampling and scoring
+		#astroML XDGMM object that will be used for sampling and scoring, regardless of model
 		self.GMM=astroML_XDGMM(self.n_components, n_iter=self.n_iter,tol=self.tol)
 
-	def fit(self, X, Xerr, R=None):
+
+	def fit(self, X, Xerr):
+		"""
+		Fit the XD model to data
+		Whichever method is specified in self.method will be used.
+
+        Parameters
+        ----------
+        X: array_like
+            Input data. shape = (n_samples, n_features)
+        Xerr: array_like
+            Error on input data.  shape = (n_samples, n_features, n_features)
+        """
+        
 		if self.method=='astroML':
 			print self.n_components
 			self.GMM.n_components=self.n_components
@@ -80,28 +95,74 @@ class XDGMM(BaseEstimator):
     		
 		return self
     
+    
 	def logL(self, X, Xerr):
-			'''
-			gmm=astroML_XDGMM(self.n_components, n_iter=self.n_iter,tol=self.tol)
-			
-			gmm.V=self.V
-			gmm.mu=self.mu
-			gmm.alpha=self.weights
-			'''
-			return self.GMM.logL(X,Xerr)
+		"""Compute the log-likelihood of data given the model
+        
+        This uses the astroML logL method, regardless of which method was used 
+        to fit the model. It is used to score the data for cross-validation.
+        
+        Parameters
+        ----------
+        X: array_like
+            data, shape = (n_samples, n_features)
+        Xerr: array_like
+            errors, shape = (n_samples, n_features, n_features)
+
+        Returns
+        -------
+        logL : float
+            log-likelihood
+        """
+
+		return self.GMM.logL(X,Xerr)
+    	
     	
 	def logprob_a(self, X, Xerr):
-			'''
-			gmm=astroML_XDGMM(self.n_components, n_iter=self.n_iter,tol=self.tol)
-			
-			gmm.V=self.V
-			gmm.mu=self.mu
-			gmm.alpha=self.weights
-			'''
-			return self.GMM.logprob_a(X,Xerr)
+	 	"""
+        Evaluate the probability for a set of points
+        
+        This uses the astroML logprob_a method, regardless of which method was used 
+        to fit the model.
+
+        Parameters
+        ----------
+        X: array_like
+            Input data. shape = (n_samples, n_features)
+        Xerr: array_like
+            Error on input data.  shape = (n_samples, n_features, n_features)
+
+        Returns
+        -------
+        p: ndarray
+            Probabilities.  shape = (n_samples,)
+        """
+
+		return self.GMM.logprob_a(X,Xerr)
+    
     
 	def sample(self, size=1, random_state=None):
-		if self.method=='astroML': return self.GMM.sample(size,random_state)
+		"""
+		Sample data from the GMM model
+        
+        This uses the astroML sample method, regardless of which method was used 
+        to fit the model.
+        
+        Parameters
+        ----------
+        size: int
+            number of samples to draw
+        random_state: random state
+            random state of the model, defaults to self.random_state
+
+        Returns
+        -------
+        sample : array_like
+            A sample of data points drawn from the model. shape = (size, n_features)
+        """
+		
+		return self.GMM.sample(size,random_state)
+    
     
 	def condition(self, X, indeces):
 		"""
@@ -109,10 +170,11 @@ class XDGMM(BaseEstimator):
 		
 		Parameters
 		----------
-		X : array_like, shape (n < n_features)
-			List of data points with demension n < n_features.
-		indeces: array_like, shape (X.shape)
-			List of indeces in the GMM model that correspond to the values in X
+		X : array_like
+			List of data points with demension n < n_features. shape = (n < n_features)
+		indeces: array_like
+			List of indeces in the GMM model that correspond to the values in X. shape = (X.shape)
+			
 		Returns
 		-------
 		XDGMM object with n_features = self.n_features-X.shape, n_components=self.n_components
@@ -174,16 +236,12 @@ class XDGMM(BaseEstimator):
 		return XDGMM(n_components=self.n_components,n_iter=self.n_iter,method=self.method,V=new_V,mu=new_mu,weights=new_weights)
 	
 	def score(self, X, Xerr):
-		'''
-		gmm=skl_GMM(n_components=self.n_components, n_iter=self.n_iter, covariance_type='full')
-		gmm.covars_=self.V
-		gmm.means_=self.mu
-		gmm.weights_=self.weights
-		
-		return logsumexp(gmm.score(X))
-		'''
+
 		return self.logL(X, Xerr)
+		
 	'''
+	Unsure if these methods are needed for ML or not; leaving them for now.
+	
 	def predict(self, X):
 		gmm=skl_GMM(n_components=self.n_components, n_iter=self.n_iter, covariance_type='full')
 		gmm.covars_=self.V
