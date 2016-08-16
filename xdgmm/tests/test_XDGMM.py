@@ -1,7 +1,6 @@
 """
 Test code for XDGMM class.
 """
-#from __future__ import absolute_import, division
 import os
 import unittest
 import numpy as np
