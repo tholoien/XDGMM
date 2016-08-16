@@ -108,7 +108,7 @@ class XDGMM(BaseEstimator):
         """
         
         if self.method=='astroML':
-            
+            self.GMM.n_components=self.n_components
             self.GMM.fit(X, Xerr)
             
             self.V=self.GMM.V
