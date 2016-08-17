@@ -120,13 +120,13 @@ def plot_cond_sample(x, y):
     setup_text_plots(fontsize=16, usetex=True)
     fig = plt.figure(figsize=(12, 9))
     
-    plt.scatter(x, y, color='red', s=4, lw=0)
+    plt.hist(x, 50, histtype='step', color='red',lw=2)
     
-    plt.ylim(-6,16)
+    plt.ylim(0,70)
     plt.xlim(-1,13)
     
     plt.xlabel('$x$', fontsize=18)
-    plt.ylabel('$y$', fontsize=18)
+    plt.ylabel('Number of Points', fontsize=18)
     
     plt.show()
     
