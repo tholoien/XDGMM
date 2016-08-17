@@ -109,6 +109,7 @@ class XDGMM(BaseEstimator):
         
         if self.method=='astroML':
             self.GMM.n_components=self.n_components
+            self.GMM.n_iter=self.n_iter
             self.GMM.fit(X, Xerr)
             
             self.V=self.GMM.V
@@ -116,7 +117,7 @@ class XDGMM(BaseEstimator):
             self.weights=self.GMM.alpha
         
         if self.method=='Bovy':
-            '''
+            """
             Bovy extreme_deconvolution only imports if the method is
                 'Bovy' (this is because installation is somewhat more
                 complicated than astroML, and we don't want it to be
@@ -124,7 +125,7 @@ class XDGMM(BaseEstimator):
             
             As with the astroML method, initialize with a few steps of
                 the scikit-learn GMM
-            '''
+            """
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
@@ -136,7 +137,8 @@ class XDGMM(BaseEstimator):
             self.weights = tmp_gmm.weights_
             self.V = tmp_gmm.covars_
             
-            logl=bovyXD(X,Xerr,self.weights,self.mu,self.V)
+            logl=bovyXD(X,Xerr,self.weights,self.mu,self.V,
+                        maxiter=self.n_iter, tol=self.tol)
             self.GMM.V=self.V
             self.GMM.mu=self.mu
             self.GMM.alpha=self.weights
@@ -323,7 +325,34 @@ class XDGMM(BaseEstimator):
             raise StandardError("Model parameters not set.")
     	
     	return self.GMM.logprob_a(X,Xerr)
-    
+
+    def bic(self, X, Xerr):
+        """Compute Bayesian information criterion for current model and
+        proposed data.
+        
+        Computed in the same way as the scikit-learn GMM model computes
+        the BIC.
+        
+        Parameters
+        ----------
+        X: array_like, shape = (n_samples, n_features)
+            Input data.
+        Xerr: array_like, shape = (n_samples, n_features, n_features)
+            Error on input data. 
+
+        Returns
+        -------
+        bic: float
+            BIC for the model and data (lower is better).
+        """
+        logprob, _ = self.score_samples(X,Xerr)
+        
+        ndim = self.mu.shape[1]
+        cov_params = self.n_components * ndim * (ndim + 1) / 2.
+        mean_params = ndim * self.n_components
+        n_params = int(cov_params + mean_params + self.n_components - 1)
+        
+        return (-2 * logprob.sum() + n_params * np.log(X.shape[0]))
     
     def sample(self, size=1, random_state=None):
         """Sample data from the GMM model
