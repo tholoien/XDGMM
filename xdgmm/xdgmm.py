@@ -29,31 +29,32 @@ class XDGMM(BaseEstimator):
     Parameters
     ----------
     n_components: integer
-        number of gaussian components to fit to the data (default=1)
+        Number of gaussian components to fit to the data (default=1)
     n_iter: integer (optional)
-        number of EM iterations to perform (default=100)
+        Number of EM iterations to perform (default=100).
+        Not used with Bovy fitting method.
     tol: float (optional)
-        stopping criterion for EM iterations (default=1E-5)
+        Stopping criterion for EM iterations (default=1E-5).
     method: string (optional) 
-        astroML or Bovy (default="astroML")
+        astroML or Bovy (default="astroML").
         
     Can be initialized with already known mu, alpha, and V:
-    alpha: array_like (optional)
-        Weights for each gaussian (default=None)
-        shape = (n_components)
-    mu: array_like (optional)
-        Means for each gaussian (default=None)
-        shape = (n_components, n_features)
-    V: array_like (optional)
-        Covariance matrices for each gaussian (default=None)
-        shape  = (n_components, n_features, n_features)
+    
+    alpha: array_like (optional), shape = (n_components,)
+        Weights for each gaussian (default=None).
+    mu: array_like (optional), shape = (n_components, n_features)
+        Means for each gaussian (default=None).
+    V: array_like (optional), 
+       shape  = (n_components, n_features, n_features)
+       Covariance matrices for each gaussian (default=None).
     
     Can also be initialized from a file with a model saved in the format
         used by save_model and read_model. If a filename is given, the 
         model in the file will override any parameters passed to the 
         init function:
+        
     filename: string (optional)
-        Name of file from which to read in model parameters
+        Name of file from which to read in model parameters.
 
     Notes
     -----
@@ -67,6 +68,11 @@ class XDGMM(BaseEstimator):
     def __init__(self, n_components=1, n_iter=100, tol=1E-5,
                  method='astroML', random_state = None, V=None, mu=None,
                  weights=None,filename=None):
+        
+        if method != 'astroML' or method !='Bovy':
+            raise ValueError("Fitting method must be 'astroML or " +
+                             "'Bovy'.")
+        
         if filename is not None:
             self.read_model(filename)
         
@@ -100,11 +106,10 @@ class XDGMM(BaseEstimator):
 
         Parameters
         ----------
-        X: array_like
-            Input data. shape = (n_samples, n_features)
-        Xerr: array_like
+        X: array_like, shape = (n_samples, n_features)
+            Input data. 
+        Xerr: array_like, shape = (n_samples, n_features, n_features)
             Error on input data.
-            shape = (n_samples, n_features, n_features)
         """
         
         if self.method=='astroML':
@@ -138,7 +143,7 @@ class XDGMM(BaseEstimator):
             self.V = tmp_gmm.covars_
             
             logl=bovyXD(X,Xerr,self.weights,self.mu,self.V,
-                        maxiter=self.n_iter, tol=self.tol)
+                        tol=self.tol)
             self.GMM.V=self.V
             self.GMM.mu=self.mu
             self.GMM.alpha=self.weights
@@ -378,7 +383,7 @@ class XDGMM(BaseEstimator):
         return self.GMM.sample(size,random_state)
     
     
-    def condition(self, X):
+    def condition(self, X, Xerr=None):
         """Condition the model based on known values for some
         features.
         
@@ -388,6 +393,10 @@ class XDGMM(BaseEstimator):
             An array of input values. Inputs set to NaN are not set, and 
             become features to the resulting distribution. Order is
             preserved.
+        Xerr: array_like (optional), shape  = (n_features, )
+            Errors for input values. Indeces not being used for 
+            conditioning should be set to 0.0. If None, no additional
+            error is included in the conditioning. (default=None).
             
         Returns
         -------
@@ -405,6 +414,11 @@ class XDGMM(BaseEstimator):
         not_set_idx=np.nonzero(np.isnan(X))[0]
         set_idx=np.nonzero(True-np.isnan(X))[0]
         x=X[set_idx]
+        covars=self.V
+        
+        if Xerr is not None:
+            for i in set_idx:
+                covars[:,i,i] += Xerr[i]
         
         for i in range(self.n_components):
             a=[]
@@ -423,18 +437,18 @@ class XDGMM(BaseEstimator):
             for j in not_set_idx:
                 tmp=[]
                 for k in not_set_idx:
-                    tmp.append(self.V[i][j,k])
+                    tmp.append(covars[i][j,k])
                 A.append(np.array(tmp))
                 
                 tmp=[]
                 for k in set_idx:
-                    tmp.append(self.V[i][j,k])
+                    tmp.append(covars[i][j,k])
                 C.append(np.array(tmp))
             
             for j in set_idx:
                 tmp=[]
                 for k in set_idx:
-                    tmp.append(self.V[i][j,k])
+                    tmp.append(covars[i][j,k])
                 B.append(np.array(tmp))
             
             a=np.array(a)
