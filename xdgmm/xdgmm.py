@@ -69,8 +69,8 @@ class XDGMM(BaseEstimator):
                  method='astroML', random_state = None, V=None, mu=None,
                  weights=None,filename=None):
         
-        if method != 'astroML' or method !='Bovy':
-            raise ValueError("Fitting method must be 'astroML or " +
+        if method != 'astroML' and method !='Bovy':
+            raise ValueError("Fitting method must be 'astroML' or " +
                              "'Bovy'.")
         
         if filename is not None:
