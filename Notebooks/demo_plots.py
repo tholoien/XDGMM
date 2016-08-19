@@ -27,6 +27,24 @@ def plot_bic(param_range,bics,lowest_comp):
 
     plt.show()
 
+def plot_val_curve(param_range, train_mean, train_std, test_mean,
+                   test_std):
+    plt.clf()
+    setup_text_plots(fontsize=16, usetex=True)
+    fig=plt.figure(figsize=(12,8))
+    plt.plot(param_range, train_mean, label="Training score", 
+             color="red")
+    plt.fill_between(param_range, train_mean - train_std,
+                     train_mean + train_std, alpha=0.2, color="red")
+    plt.plot(param_range, test_mean,label="Cross-validation score", 
+             color="green")
+    plt.fill_between(param_range, test_mean - test_std,
+                     test_mean + test_std, alpha=0.2, color="green")
+                     
+    plt.legend(loc="best")
+    plt.xlabel("Number of Components", fontsize=18)
+    plt.ylabel("Score", fontsize=18)
+    plt.show()
 
 def plot_sample(x_true, y_true, x, y, sample, xdgmm):
     setup_text_plots(fontsize=16, usetex=True)
@@ -85,6 +103,7 @@ def plot_cond_model(xdgmm, cond_xdgmm, y):
     fig = plt.figure(figsize=(12, 9))
     
     ax1 = fig.add_subplot(111)
+    print xdgmm.V
     for i in range(xdgmm.n_components):
         draw_ellipse(xdgmm.mu[i], xdgmm.V[i], scales=[2], ax=ax1,
                      ec='k', fc='gray', alpha=0.2)
@@ -108,7 +127,7 @@ def plot_cond_model(xdgmm, cond_xdgmm, y):
 
     pdf = np.exp(logprob)
     ax2.plot(x, pdf, color='red', linewidth = 2,
-             label='Cond. dist. of $x$ given $y='+str(y)+'$')
+             label='Cond. dist. of $x$ given $y='+str(y)+'\pm 0.05$')
     ax2.legend()
     ax2.set_ylabel('Probability', fontsize= 18 )
     ax2.set_ylim(0, 0.52)
@@ -130,4 +149,22 @@ def plot_cond_sample(x, y):
     
     plt.show()
     
-
+def plot_fit(y, true_x, fit_x):
+    plt.clf()
+    setup_text_plots(fontsize=16, usetex=True)
+    fig = plt.figure(figsize=(12, 9))
+    
+    plt.scatter(true_x, y, color='red', s=4, marker='o',
+                label="True Distribution")
+    plt.scatter(fit_x, y, color='blue', s=4, marker='o',
+                label="Fit Distribution")
+    
+    plt.xlim(-1, 13)
+    plt.ylim(-6, 16)
+    plt.legend(loc=2, scatterpoints=1)
+    
+    plt.xlabel('$x$', fontsize = 18)
+    plt.ylabel('$y$', fontsize = 18)
+    plt.show()
+    
+    

@@ -69,8 +69,8 @@ class XDGMM(BaseEstimator):
                  method='astroML', random_state = None, V=None, mu=None,
                  weights=None,filename=None):
         
-        if method != 'astroML' or method !='Bovy':
-            raise ValueError("Fitting method must be 'astroML or " +
+        if method != 'astroML' and method !='Bovy':
+            raise ValueError("Fitting method must be 'astroML' or " +
                              "'Bovy'.")
         
         if filename is not None:
@@ -414,7 +414,7 @@ class XDGMM(BaseEstimator):
         not_set_idx=np.nonzero(np.isnan(X))[0]
         set_idx=np.nonzero(True-np.isnan(X))[0]
         x=X[set_idx]
-        covars=self.V
+        covars=np.copy(self.V)
         
         if Xerr is not None:
             for i in set_idx:
