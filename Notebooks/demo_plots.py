@@ -44,6 +44,7 @@ def plot_val_curve(param_range, train_mean, train_std, test_mean,
     plt.legend(loc="best")
     plt.xlabel("Number of Components", fontsize=18)
     plt.ylabel("Score", fontsize=18)
+    plt.xlim(1,10)
     plt.show()
 
 def plot_sample(x_true, y_true, x, y, sample, xdgmm):
@@ -103,7 +104,6 @@ def plot_cond_model(xdgmm, cond_xdgmm, y):
     fig = plt.figure(figsize=(12, 9))
     
     ax1 = fig.add_subplot(111)
-    print xdgmm.V
     for i in range(xdgmm.n_components):
         draw_ellipse(xdgmm.mu[i], xdgmm.V[i], scales=[2], ax=ax1,
                      ec='k', fc='gray', alpha=0.2)
