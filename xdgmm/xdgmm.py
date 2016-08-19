@@ -414,7 +414,7 @@ class XDGMM(BaseEstimator):
         not_set_idx=np.nonzero(np.isnan(X))[0]
         set_idx=np.nonzero(True-np.isnan(X))[0]
         x=X[set_idx]
-        covars=self.V
+        covars=np.copy(self.V)
         
         if Xerr is not None:
             for i in set_idx:
