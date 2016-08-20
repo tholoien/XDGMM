@@ -463,7 +463,8 @@ class XDGMM(BaseEstimator):
             new_mu.append(mu_cond)
             new_V.append(V_cond)
             
-            pk.append(multivariate_normal.pdf(x,mean=b,cov=B))
+            pk.append(multivariate_normal.pdf(x,mean=b,cov=B,
+                                              allow_singular=True))
         
         new_mu=np.array(new_mu)
         new_V=np.array(new_V)
