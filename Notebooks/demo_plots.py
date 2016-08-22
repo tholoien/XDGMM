@@ -44,7 +44,7 @@ def plot_val_curve(param_range, train_mean, train_std, test_mean,
     plt.legend(loc="best")
     plt.xlabel("Number of Components", fontsize=18)
     plt.ylabel("Score", fontsize=18)
-    plt.xlim(1,10)
+    plt.xlim(param_range.min(),param_range.max())
     plt.show()
 
 def plot_sample(x_true, y_true, x, y, sample, xdgmm):
