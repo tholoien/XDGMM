@@ -81,7 +81,7 @@ class XDGMM(BaseEstimator):
 		    if n_iter != 0: self.n_iter = n_iter
 		    else:
 		        if method=='astroML': self.n_iter = 100
-		        else: self.n_iter = 1e9
+		        else: self.n_iter = 10**9
 		    self.tol = tol
 		    self.random_state = random_state
 		    self.method=method
@@ -137,7 +137,7 @@ class XDGMM(BaseEstimator):
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
-            tmp_gmm = skl_GMM(self.n_components, n_iter=self.n_iter,
+            tmp_gmm = skl_GMM(self.n_components, n_iter=10,
                               covariance_type='full',
                               random_state=self.random_state)
             tmp_gmm.fit(X)
