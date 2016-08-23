@@ -31,8 +31,8 @@ class XDGMM(BaseEstimator):
     n_components: integer
         Number of gaussian components to fit to the data (default=1)
     n_iter: integer (optional)
-        Number of EM iterations to perform (default=100).
-        Not used with Bovy fitting method.
+        Number of EM iterations to perform
+        (default=100 for astroML, 1e9 for Bovy).
     tol: float (optional)
         Stopping criterion for EM iterations (default=1E-5).
     method: string (optional) 
@@ -65,7 +65,7 @@ class XDGMM(BaseEstimator):
         implements the necessary methods for cross-validation.
     """
     
-    def __init__(self, n_components=1, n_iter=100, tol=1E-5,
+    def __init__(self, n_components=1, n_iter=0, tol=1E-5,
                  method='astroML', random_state = None, V=None, mu=None,
                  weights=None,filename=None):
         
@@ -78,7 +78,10 @@ class XDGMM(BaseEstimator):
         
         else:       
 		    self.n_components = n_components
-		    self.n_iter = n_iter
+		    if n_iter != 0: self.n_iter = n_iter
+		    else:
+		        if method=='astroML': self.n_iter = 100
+		        else: self.n_iter = 1e9
 		    self.tol = tol
 		    self.random_state = random_state
 		    self.method=method
@@ -90,7 +93,7 @@ class XDGMM(BaseEstimator):
 		    self.weights = weights
 		    
 		    self.GMM=astroML_XDGMM(n_components,
-		                           n_iter=n_iter,tol=tol,
+		                           n_iter=self.n_iter,tol=tol,
 		                           random_state=random_state)
 		    self.GMM.mu=mu
 		    self.GMM.V=V
@@ -134,7 +137,7 @@ class XDGMM(BaseEstimator):
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
-            tmp_gmm = skl_GMM(self.n_components, n_iter=10,
+            tmp_gmm = skl_GMM(self.n_components, n_iter=self.n_iter,
                               covariance_type='full',
                               random_state=self.random_state)
             tmp_gmm.fit(X)
@@ -143,7 +146,7 @@ class XDGMM(BaseEstimator):
             self.V = tmp_gmm.covars_
             
             logl=bovyXD(X,Xerr,self.weights,self.mu,self.V,
-                        tol=self.tol)
+                        tol=self.tol,maxiter=self.n_iter)
             self.GMM.V=self.V
             self.GMM.mu=self.mu
             self.GMM.alpha=self.weights
@@ -287,7 +290,7 @@ class XDGMM(BaseEstimator):
     def score(self, X, Xerr):
         """Compute the score of data given the model
         
-        Provides the log-likelihood of the data in X based on the 
+        Provides the mean log-likelihood of the data in X based on the 
             model as a score for scikit-learn cross-validation.
             
         Parameters
@@ -305,7 +308,9 @@ class XDGMM(BaseEstimator):
         if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
         
-        return self.logL(X, Xerr)
+        logprob = self.GMM.logprob_a(X,Xerr)
+        logLs = np.sum(logprob[:],axis=1)
+        return np.mean(logLs)
         
     def logprob_a(self, X, Xerr):
         """Compute the log probability of the data under the model
