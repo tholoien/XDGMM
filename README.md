@@ -4,10 +4,10 @@ This is a Python class for using Gaussian mixtures to do density estimation of n
 [![Build Status](https://travis-ci.org/tholoien/XDGMM.svg?branch=master)](https://travis-ci.org/tholoien/XDGMM)
 
 ## XDGMM Algorithms
-The code currently supports the [astroML](http://www.astroml.org/index.html) algorithm for XDGMM fitting and sampling. The [Bovy et al. (2011)](https://github.com/jobovy/extreme-deconvolution) algorithm will be implemented.
+The code currently supports the [astroML](http://www.astroml.org/index.html) and [Bovy et al. (2011)](https://github.com/jobovy/extreme-deconvolution) algorithms for XDGMM fitting and sampling.
 
 ## Machine Learning
-This class is compatible with cross validation methods from [scikit-learn](http://scikit-learn.org/stable/).
+This class is compatible with cross validation methods from [scikit-learn](http://scikit-learn.org/stable/). See the demo for an example of this functionality.
 
 ## Other Capabilities
 XDGMM also allows the user to produce a conditional XDGMM distribution given values for some of the parameters used to create the model. For example, if parameters A, B, and C were used to fit a model and the value of C is known, you can produce a model for just parameters A and B that is conditioned on the known value of C.
