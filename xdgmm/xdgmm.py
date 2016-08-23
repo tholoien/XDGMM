@@ -309,7 +309,7 @@ class XDGMM(BaseEstimator):
             raise StandardError("Model parameters not set.")
         
         logprob = self.GMM.logprob_a(X,Xerr)
-        logLs = np.sum(logprob[:],axis=1)
+        logLs = logsumexp(logprob,axis=-1)
         return np.mean(logLs)
         
     def logprob_a(self, X, Xerr):
