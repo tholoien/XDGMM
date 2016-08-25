@@ -341,7 +341,7 @@ class XDGMM(BaseEstimator):
         proposed data.
         
         Computed in the same way as the scikit-learn GMM model computes
-        the BIC.
+            the BIC.
         
         Parameters
         ----------
@@ -376,8 +376,9 @@ class XDGMM(BaseEstimator):
             Error on input data. 
         param_range: array_like
             Range of component values to fit
-        no_err: bool
-            Flag for whether to compute BIC using the error array or not
+        no_err: bool (optional)
+            Flag for whether to compute BIC using the error array 
+            included or not (default = False)
 
         Returns
         -------
@@ -407,7 +408,7 @@ class XDGMM(BaseEstimator):
         """Sample data from the GMM model
         
         This uses the astroML XDGMM.sample method, regardless of which
-        method was used to fit the model.
+            method was used to fit the model.
         
         Parameters
         ----------
