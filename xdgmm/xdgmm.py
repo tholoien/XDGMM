@@ -364,7 +364,7 @@ class XDGMM(BaseEstimator):
         
         return (-2 * logprob.sum() + n_params * np.log(X.shape[0]))
         
-    def bic_test(self, X, Xerr, param_range):
+    def bic_test(self, X, Xerr, param_range, no_err=False):
         """Compute Bayesian information criterion for a range of numbers
         of components and proposed data.
         
@@ -376,6 +376,8 @@ class XDGMM(BaseEstimator):
             Error on input data. 
         param_range: array_like
             Range of component values to fit
+        no_err: bool
+            Flag for whether to compute BIC using the error array or not
 
         Returns
         -------
@@ -389,10 +391,12 @@ class XDGMM(BaseEstimator):
         bics = np.array([])
         lowest_bic = np.infty
         optimal_n_comp = 0
+        if no_err: Xerr_zero = np.zeros(Xerr.shape)
         for n_components in param_range:
             self.n_components = n_components
             self.fit(X, Xerr)
-            bics = np.append(bics, self.bic(X, Xerr))
+            if no_err: bics = np.append(bics, self.bic(X, Xerr_zero))
+            else: bics = np.append(bics, self.bic(X, Xerr))
             print "N =",n_components,", BIC =",bics[-1]
             if bics[-1] < lowest_bic:
                 optimal_n_comp = n_components
