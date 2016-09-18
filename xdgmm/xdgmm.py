@@ -37,16 +37,20 @@ class XDGMM(BaseEstimator):
         Stopping criterion for EM iterations (default=1E-5).
     method: string (optional) 
         astroML or Bovy (default="astroML").
+    labels: array_like (optional), shape = (n_features,)
+        Array of labels for parameters used in the fit. Order matters
+        (e.g., the first label corresponds to the first parameter in the
+        alpha array, etc.) (default = None).
         
     Can be initialized with already known mu, alpha, and V:
     
     alpha: array_like (optional), shape = (n_components,)
-        Weights for each gaussian (default=None).
+        Weights for each gaussian (default = None).
     mu: array_like (optional), shape = (n_components, n_features)
-        Means for each gaussian (default=None).
+        Means for each gaussian (default = None).
     V: array_like (optional), 
        shape  = (n_components, n_features, n_features)
-       Covariance matrices for each gaussian (default=None).
+       Covariance matrices for each gaussian (default = None).
     
     Can also be initialized from a file with a model saved in the format
         used by save_model and read_model. If a filename is given, the 
@@ -66,8 +70,8 @@ class XDGMM(BaseEstimator):
     """
     
     def __init__(self, n_components=1, n_iter=0, tol=1E-5,
-                 method='astroML', random_state = None, V=None, mu=None,
-                 weights=None,filename=None):
+                 method='astroML', labels = None, random_state = None, 
+                 V=None, mu=None, weights=None,filename=None):
         
         if method != 'astroML' and method !='Bovy':
             raise ValueError("Fitting method must be 'astroML' or " +
@@ -84,7 +88,8 @@ class XDGMM(BaseEstimator):
 		        else: self.n_iter = 10**9
 		    self.tol = tol
 		    self.random_state = random_state
-		    self.method=method
+		    self.method = method
+		    self.labels = labels
 		    
 		    # Model parameters. These are set by the fit() method but
 		    # can be set at initialization.
@@ -415,7 +420,7 @@ class XDGMM(BaseEstimator):
         size: int
             Number of samples to draw.
         random_state: random state
-            Random state of the model (default = self.random_state)
+            Random state of the model (default = self.random_state).
 
         Returns
         -------
@@ -428,20 +433,29 @@ class XDGMM(BaseEstimator):
         return self.GMM.sample(size,random_state)
     
     
-    def condition(self, X, Xerr=None):
+    def condition(self, X_input=None, Xerr_input=None, X_dict=None):
         """Condition the model based on known values for some
         features.
         
         Parameters
         ----------
-        X : array_like, shape = (n_features,)
+        X_input : array_like (optional), shape = (n_features, )
             An array of input values. Inputs set to NaN are not set, and 
             become features to the resulting distribution. Order is
-            preserved.
-        Xerr: array_like (optional), shape  = (n_features, )
+            preserved. Either an X array or an X dictionary is required
+            (default=None).
+        Xerr_input: array_like (optional), shape  = (n_features, )
             Errors for input values. Indeces not being used for 
             conditioning should be set to 0.0. If None, no additional
-            error is included in the conditioning. (default=None).
+            error is included in the conditioning (default=None).
+        X_dict: dictionary (optional), shape = (n_features, )
+            A dictionary containing label:float or label:tuple pairs.
+            If labels correspond to floats, no additional error is
+            included in the conditioning. If tuples, it is assumed that
+            the structs have the form (X_value, X_err). If self.labels
+            is None, an error will be thrown. Dictionary values will
+            supercede any X_input or Xerr_input arrays. Either an X 
+            array or an X dictionary is required (default=None).
             
         Returns
         -------
@@ -451,6 +465,33 @@ class XDGMM(BaseEstimator):
         """
         if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
+        
+        if X_input is None and X_dict is None:
+            raise StandardError("X values or dictionary must be given.")
+        
+        if X_input is None and X_dict is not None and self.labels is None:
+            raise StandardError("Labels array is required for "
+                                 + "dictionary option to be used.")
+        
+        if X_dict is not None:
+            X=[]
+            Xerr=[]
+            for i in range(len(self.labels)):
+                label=self.labels[i]
+                if label in X_dict:
+                    if isinstance(X_dict[label],float):
+                        X.append(X_dict[label])
+                        Xerr.append(0.0)
+                    elif isinstance(X_dict[label],tuple):
+                        X.append(X_dict[label][0])
+                        Xerr.append(X_dict[label][1])
+                else:
+                    X.append(np.nan)
+                    Xerr.append(0.0)
+        
+        else:
+            X=X_input
+            Xerr=Xerr_input
         
         new_mu=[]
         new_V=[]
@@ -542,6 +583,14 @@ class XDGMM(BaseEstimator):
         outfile.write(str(self.n_components)+','+str(self.n_iter)
                       +','+str(self.tol)+','+self.method+','
                       +str(self.random_state)+'\n')
+        
+        outfile.write('# labels\n')
+        if self.labels is None: outfile.write('No labels\n')
+        else:
+            for i in range(len(self.labels)):
+                outfile.write(str(self.labels[i]))
+                if i != len(self.labels)-1: outfile.write(',')
+                else: outfile.write('\n')
                       
         outfile.write('# weights\n')
         for i in range(len(self.weights)):
@@ -591,15 +640,24 @@ class XDGMM(BaseEstimator):
         if params[4]=='None\n': self.random_state=None
         else: self.random_state=int(params[4])
         
-        weight_line=inlines[4].split(',')
+        if inlines[4]=='No labels\n': self.labels=None
+        else:
+            labels_line=inlines[4].split(',')
+            labels=[]
+            for label in labels_line:
+                labels.append(label.split()[0])
+            labels=np.array(labels)
+            self.labels=labels
+        
+        weight_line=inlines[6].split(',')
         weights=[]
         for weight in weight_line:
             weights.append(float(weight))
         weights=np.array(weights)
-        self.weights=np.array(weights)
+        self.weights=weights
         
         mu=[]
-        for i in range(6,len(inlines)):
+        for i in range(8,len(inlines)):
             if inlines[i]=='# covars\n':
                 nextidx=i+1
                 break
