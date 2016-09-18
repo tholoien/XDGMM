@@ -469,7 +469,8 @@ class XDGMM(BaseEstimator):
         if X_input is None and X_dict is None:
             raise StandardError("X values or dictionary must be given.")
         
-        if X_input is None and X_dict is not None and self.labels is None:
+        if X_input is None and X_dict is not None and \
+            self.labels is None:
             raise StandardError("Labels array is required for "
                                  + "dictionary option to be used.")
         
@@ -488,6 +489,8 @@ class XDGMM(BaseEstimator):
                 else:
                     X.append(np.nan)
                     Xerr.append(0.0)
+            X=np.array(X)
+            Xerr=np.array(Xerr)
         
         else:
             X=X_input
