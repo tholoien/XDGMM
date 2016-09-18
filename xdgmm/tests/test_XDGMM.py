@@ -76,7 +76,7 @@ class XDGMMTestCase(unittest.TestCase):
     
     def test_Condition(self):
         self.xdgmm.fit(self.X, self.Xerr)
-        cond_xd=self.xdgmm.condition([np.nan,3.5])
+        cond_xd=self.xdgmm.condition(X_input=np.array([np.nan,3.5]))
         
         self.assertEqual(cond_xd.mu.shape,(3,1))
         self.assertEqual(cond_xd.V.shape,(3,1,1))
