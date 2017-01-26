@@ -147,7 +147,7 @@ class XDGMM(BaseEstimator):
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
-            tmp_gmm = skl_GMM(self.n_components, n_iter=10,
+            tmp_gmm = skl_GMM(self.n_components, max_iter=10,
                               covariance_type='full',
                               random_state=self.random_state)
             tmp_gmm.fit(X)

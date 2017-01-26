@@ -17,9 +17,9 @@ class XDGMMTestCase(unittest.TestCase):
         self.files=[]
         
         """
-        Use scikit-learn GMM for sampling some data points
+        Use scikit-learn GaussianMixture for sampling some data points
         """
-        self.gmm = skl_GMM(n_components=3, n_iter=10,
+        self.gmm = skl_GMM(n_components=3, max_iter=10,
                            covariance_type='full',
                            random_state=None)
         self.gmm.weights_=np.array([0.3,0.5,0.2])
