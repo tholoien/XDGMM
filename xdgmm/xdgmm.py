@@ -195,7 +195,7 @@ class XDGMM(BaseEstimator):
         if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
         
-        tmp_GMM=skl_GMM(self.n_components, n_iter=self.n_iter,
+        tmp_GMM=skl_GMM(self.n_components, max_iter=self.n_iter,
                         covariance_type='full',
                         random_state=self.random_state)
         tmp_GMM.weights_=self.weights
@@ -210,6 +210,7 @@ class XDGMM(BaseEstimator):
         
         for i in range(X.shape[0]):
             tmp_GMM.covars_=T[i]
+            tmp.GMM.precisions_=np.linalg.inv(T[i])
             lp,resp=tmp_GMM.score_samples(X[i])
             logprob.append(lp)
             responsibilities.append(resp)
