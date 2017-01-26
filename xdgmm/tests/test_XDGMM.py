@@ -4,7 +4,7 @@ Test code for XDGMM class.
 import os
 import unittest
 import numpy as np
-from sklearn.mixture import GMM as skl_GMM
+from sklearn.mixture import GaussianMixture as skl_GMM
 from xdgmm import XDGMM
 
 class XDGMMTestCase(unittest.TestCase):
