@@ -15,7 +15,7 @@ import numpy as np
 from scipy import linalg
 from scipy.stats import multivariate_normal
 
-from sklearn.mixture import GMM as skl_GMM
+from sklearn.mixture import GaussianMixture as skl_GMM
 from sklearn.base import BaseEstimator
 
 from astroML.density_estimation import XDGMM as astroML_XDGMM
