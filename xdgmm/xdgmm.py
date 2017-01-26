@@ -59,6 +59,10 @@ class XDGMM(BaseEstimator):
         
     filename: string (optional)
         Name of file from which to read in model parameters.
+    
+    w: float (optional)
+        w covariance regulation parameter for Bovy fitting method. Only 
+        used if method = 'Bovy'. (default = 0.)
 
     Notes
     -----
@@ -71,7 +75,7 @@ class XDGMM(BaseEstimator):
     
     def __init__(self, n_components=1, n_iter=0, tol=1E-5,
                  method='astroML', labels = None, random_state = None, 
-                 V=None, mu=None, weights=None,filename=None):
+                 V=None, mu=None, weights=None, filename=None, w=0.):
         
         if method != 'astroML' and method !='Bovy':
             raise ValueError("Fitting method must be 'astroML' or " +
@@ -90,6 +94,7 @@ class XDGMM(BaseEstimator):
 		    self.random_state = random_state
 		    self.method = method
 		    self.labels = labels
+		    self.w = w
 		    
 		    # Model parameters. These are set by the fit() method but
 		    # can be set at initialization.
@@ -151,7 +156,7 @@ class XDGMM(BaseEstimator):
             self.V = tmp_gmm.covars_
             
             logl=bovyXD(X,Xerr,self.weights,self.mu,self.V,
-                        tol=self.tol,maxiter=self.n_iter)
+                        tol=self.tol,maxiter=self.n_iter,w=self.w)
             self.GMM.V=self.V
             self.GMM.mu=self.mu
             self.GMM.alpha=self.weights
