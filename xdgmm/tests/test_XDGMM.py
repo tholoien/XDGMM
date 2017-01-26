@@ -20,7 +20,7 @@ class XDGMMTestCase(unittest.TestCase):
         """
         Use scikit-learn GaussianMixture for sampling some data points
         """
-        self.gmm = skl_GMM(n_components=3, max_iter=10,
+        self.gmm = skl_GMM(n_components=3, n_iter=10,
                            covariance_type='full',
                            random_state=None)
         self.gmm.weights_=np.array([0.3,0.5,0.2])
@@ -30,7 +30,7 @@ class XDGMMTestCase(unittest.TestCase):
                                    np.array([[1,0.2],[0.2,1]]),
                                    np.diag((0.3,0.5))])
         
-        self.X=self.gmm.sample(1000)[0]
+        self.X=self.gmm.sample(1000)
         errs=0.2*np.random.random_sample((1000,2))
         self.Xerr = np.zeros(self.X.shape + self.X.shape[-1:])
         diag = np.arange(self.X.shape[-1])
