@@ -30,6 +30,11 @@ class XDGMMTestCase(unittest.TestCase):
                            weights_init=weights, means_init=means,
                            precisions_init=np.linalg.inv(covars))
         
+        self.gmm.precisions_cholesky_ = np.array([linalg.cholesky(
+                                                  prec_init, lower=True)
+                                                  for prec_init in 
+                                                  self.gmm.precisions_])
+        
         self.X=self.gmm.sample(1000)
         errs=0.2*np.random.random_sample((1000,2))
         self.Xerr = np.zeros(self.X.shape + self.X.shape[-1:])
