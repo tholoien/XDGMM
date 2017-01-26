@@ -21,9 +21,8 @@ class XDGMMTestCase(unittest.TestCase):
         """
         weights = np.array([0.3,0.5,0.2])
         means = np.array([np.array([0,1]),np.array([5,4]),np.array([2,4])])
-        covars = self.gmm.covars_=np.array([np.diag((2,1)),
-                                            np.array([[1,0.2],[0.2,1]]),
-                                            np.diag((0.3,0.5))])
+        covars = np.array([np.diag((2,1)), np.array([[1,0.2],[0.2,1]]),
+                           np.diag((0.3,0.5))])
                                             
         self.gmm = skl_GMM(n_components=3, max_iter=10,
                            covariance_type='full',
