@@ -28,7 +28,7 @@ class XDGMMTestCase(unittest.TestCase):
         self.gmm.covars_=np.array([np.diag((2,1)),
                                    np.array([[1,0.2],[0.2,1]]),
                                    np.diag((0.3,0.5))])
-        self.gmm.precisions_=np.linalg.inv(self.GMM.covars_)
+        self.gmm.precisions_=np.linalg.inv(self.gmm.covars_)
         
         self.X=self.gmm.sample(1000)
         errs=0.2*np.random.random_sample((1000,2))
