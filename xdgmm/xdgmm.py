@@ -209,7 +209,6 @@ class XDGMM(BaseEstimator):
         responsibilities=[]
         
         for i in range(X.shape[0]):
-            print X[i]
             tmp_GMM.covars_=T[i]
             lp,resp=tmp_GMM.score_samples(X[i])
             logprob.append(lp)
