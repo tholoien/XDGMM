@@ -15,7 +15,7 @@ import numpy as np
 from scipy import linalg
 from scipy.stats import multivariate_normal
 
-from sklearn.mixture import GaussianMixture as skl_GMM
+from sklearn.mixture import GMM as skl_GMM
 from sklearn.base import BaseEstimator
 
 from astroML.density_estimation import XDGMM as astroML_XDGMM
@@ -147,7 +147,7 @@ class XDGMM(BaseEstimator):
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
-            tmp_gmm = skl_GMM(self.n_components, max_iter=10,
+            tmp_gmm = skl_GMM(self.n_components, n_iter=10,
                               covariance_type='full',
                               random_state=self.random_state)
             tmp_gmm.fit(X)
@@ -195,7 +195,7 @@ class XDGMM(BaseEstimator):
         if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
         
-        tmp_GMM=skl_GMM(self.n_components, max_iter=self.n_iter,
+        tmp_GMM=skl_GMM(self.n_components, n_iter=self.n_iter,
                         covariance_type='full',
                         random_state=self.random_state)
         tmp_GMM.weights_=self.weights
@@ -209,11 +209,8 @@ class XDGMM(BaseEstimator):
         responsibilities=[]
         
         for i in range(X.shape[0]):
-            tmp_GMM.covariances_=T[i]
-            tmp_GMM.precisions_=np.linalg.inv(T[i])
-            tmp_GMM.precisions_cholesky_ = np.array(
-                [linalg.cholesky(prec, lower=True) for prec in 
-                 self.gmm.precisions_])
+            print X[i]
+            tmp_GMM.covars_=T[i]
             lp,resp=tmp_GMM.score_samples(X[i])
             logprob.append(lp)
             responsibilities.append(resp)
