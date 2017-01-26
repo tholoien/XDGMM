@@ -4,7 +4,8 @@ Test code for XDGMM class.
 import os
 import unittest
 import numpy as np
-from sklearn.mixture import GMM as skl_GMM
+from scipy import linalg
+from sklearn.mixture import GaussianMixture as skl_GMM
 from xdgmm import XDGMM
 
 class XDGMMTestCase(unittest.TestCase):
@@ -17,19 +18,23 @@ class XDGMMTestCase(unittest.TestCase):
         self.files=[]
         
         """
-        Use scikit-learn GMM for sampling some data points
+        Use scikit-learn GaussianMixture for sampling some data points
         """
-        self.gmm = skl_GMM(n_components=3, n_iter=10,
+        self.gmm = skl_GMM(n_components=3, max_iter=10,
                            covariance_type='full',
                            random_state=None)
         self.gmm.weights_=np.array([0.3,0.5,0.2])
         self.gmm.means_=np.array([np.array([0,1]),np.array([5,4]),
                                   np.array([2,4])])
-        self.gmm.covars_=np.array([np.diag((2,1)),
+        self.gmm.covariances_=np.array([np.diag((2,1)),
                                    np.array([[1,0.2],[0.2,1]]),
                                    np.diag((0.3,0.5))])
+        self.gmm.precisions_=np.linalg.inv(self.gmm.covariances_)
+        self.gmm.precisions_cholesky_ = np.array([linalg.cholesky(prec, 
+                                                  lower=True) for prec 
+                                                  in self.gmm.precisions_])
         
-        self.X=self.gmm.sample(1000)
+        self.X=self.gmm.sample(1000)[0]
         errs=0.2*np.random.random_sample((1000,2))
         self.Xerr = np.zeros(self.X.shape + self.X.shape[-1:])
         diag = np.arange(self.X.shape[-1])
