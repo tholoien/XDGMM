@@ -3,7 +3,7 @@ import xdgmm
 
 setup(
     name="xdgmm",
-    version='1.0.7',
+    version='1.0.8',
     author="Tom Holoien",
     author_email="tholoien@gmail.com",
     url="https://github.com/tholoien/XDGMM",

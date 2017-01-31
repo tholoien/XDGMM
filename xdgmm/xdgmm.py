@@ -12,10 +12,10 @@ Allows conditioning of the GMM based on a subset of the parameters.
 """
 
 import numpy as np
-from scipy import linalg
 from scipy.stats import multivariate_normal
+import pandas as pd
 
-from sklearn.mixture import GMM as skl_GMM
+from sklearn.mixture import GaussianMixture as skl_GMM
 from sklearn.base import BaseEstimator
 
 from astroML.density_estimation import XDGMM as astroML_XDGMM
@@ -125,6 +125,11 @@ class XDGMM(BaseEstimator):
             Error on input data.
         """
         
+        if type(X) == pd.core.frame.DataFrame:
+            if type(X.columns) == pd.indexes.base.Index:
+                self.labels = np.array(X.columns)
+            X = X.values
+        
         if self.method=='astroML':
             self.GMM.n_components=self.n_components
             self.GMM.n_iter=self.n_iter
@@ -147,19 +152,19 @@ class XDGMM(BaseEstimator):
             from extreme_deconvolution import extreme_deconvolution\
                 as bovyXD
             
-            tmp_gmm = skl_GMM(self.n_components, n_iter=10,
+            tmp_gmm = skl_GMM(self.n_components, max_iter=10,
                               covariance_type='full',
                               random_state=self.random_state)
             tmp_gmm.fit(X)
             self.mu = tmp_gmm.means_
             self.weights = tmp_gmm.weights_
-            self.V = tmp_gmm.covars_
+            self.V = tmp_gmm.covariances_
             
             logl=bovyXD(X,Xerr,self.weights,self.mu,self.V,
                         tol=self.tol,maxiter=self.n_iter,w=self.w)
-            self.GMM.V=self.V
-            self.GMM.mu=self.mu
-            self.GMM.alpha=self.weights
+            self.GMM.V = self.V
+            self.GMM.mu = self.mu
+            self.GMM.alpha = self.weights
             
         return self
     
@@ -195,27 +200,33 @@ class XDGMM(BaseEstimator):
         if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
         
-        tmp_GMM=skl_GMM(self.n_components, n_iter=self.n_iter,
-                        covariance_type='full',
-                        random_state=self.random_state)
-        tmp_GMM.weights_=self.weights
-        tmp_GMM.means_=self.mu
+        if type(X) == pd.core.frame.DataFrame: X = X.values
+        
+        tmp_GMM = skl_GMM(self.n_components, max_iter=self.n_iter,
+                          covariance_type='full',
+                          random_state=self.random_state)
+        tmp_GMM.weights_ = self.weights
+        tmp_GMM.means_ = self.mu
         
         X = X[:, np.newaxis, :]
         Xerr = Xerr[:, np.newaxis, :, :]
         T = Xerr + self.V
         
-        logprob=[]
-        responsibilities=[]
+        logprob = []
+        responsibilities = []
         
         for i in range(X.shape[0]):
-            tmp_GMM.covars_=T[i]
-            lp,resp=tmp_GMM.score_samples(X[i])
+            tmp_GMM.covariances_ = T[i]
+            tmp_GMM.precisions_ = np.linalg.inv(T[i])
+            chol = np.linalg.cholesky(np.linalg.inv(T[i]))
+            tmp_GMM.precisions_cholesky_ = chol
+            lp = tmp_GMM.score_samples(X[i].reshape(1,-1))
             logprob.append(lp)
+            resp = tmp_GMM.predict_proba(X[i].reshape(1,-1))
             responsibilities.append(resp)
         
-        logprob=np.array(logprob)
-        responsibilities=np.array(responsibilities)
+        logprob=np.array(logprob)[:,0]
+        responsibilities=np.array(responsibilities)[:,0]
         
         return logprob,responsibilities
     
@@ -480,10 +491,10 @@ class XDGMM(BaseEstimator):
                                  + "dictionary option to be used.")
         
         if X_dict is not None:
-            X=[]
-            Xerr=[]
+            X = []
+            Xerr = []
             for i in range(len(self.labels)):
-                label=self.labels[i]
+                label = self.labels[i]
                 if label in X_dict:
                     if isinstance(X_dict[label],float):
                         X.append(X_dict[label])
@@ -494,33 +505,33 @@ class XDGMM(BaseEstimator):
                 else:
                     X.append(np.nan)
                     Xerr.append(0.0)
-            X=np.array(X)
-            Xerr=np.array(Xerr)
+            X = np.array(X)
+            Xerr = np.array(Xerr)
         
         else:
-            X=X_input
-            Xerr=Xerr_input
+            X = X_input
+            Xerr =Xerr_input
         
-        new_mu=[]
-        new_V=[]
-        pk=[]
+        new_mu = []
+        new_V = []
+        pk = []
         
-        not_set_idx=np.nonzero(np.isnan(X))[0]
-        set_idx=np.nonzero(True-np.isnan(X))[0]
-        x=X[set_idx]
-        covars=np.copy(self.V)
+        not_set_idx = np.nonzero(np.isnan(X))[0]
+        set_idx = np.nonzero(True-np.isnan(X))[0]
+        x = X[set_idx]
+        covars = np.copy(self.V)
         
         if Xerr is not None:
             for i in set_idx:
                 covars[:,i,i] += Xerr[i]
         
         for i in range(self.n_components):
-            a=[]
-            a_ind=[]
-            A=[]
-            b=[]
-            B=[]
-            C=[]
+            a = []
+            a_ind = []
+            A = []
+            b = []
+            B = []
+            C = []
             
             for j in range(len(self.mu[i])):
                 if j in not_set_idx:
@@ -545,14 +556,14 @@ class XDGMM(BaseEstimator):
                     tmp.append(covars[i][j,k])
                 B.append(np.array(tmp))
             
-            a=np.array(a)
-            b=np.array(b)
-            A=np.array(A)
-            B=np.array(B)
-            C=np.array(C)
+            a = np.array(a)
+            b = np.array(b)
+            A = np.array(A)
+            B = np.array(B)
+            C = np.array(C)
             
-            mu_cond=a+np.dot(C,np.dot(np.linalg.inv(B),(x-b)))
-            V_cond=A-np.dot(C,np.dot(np.linalg.inv(B),C.T))
+            mu_cond = a+np.dot(C,np.dot(np.linalg.inv(B),(x-b)))
+            V_cond = A-np.dot(C,np.dot(np.linalg.inv(B),C.T))
             
             new_mu.append(mu_cond)
             new_V.append(V_cond)
@@ -560,15 +571,20 @@ class XDGMM(BaseEstimator):
             pk.append(multivariate_normal.pdf(x,mean=b,cov=B,
                                               allow_singular=True))
         
-        new_mu=np.array(new_mu)
-        new_V=np.array(new_V)
-        pk=np.array(pk).flatten()
-        new_weights=self.weights*pk
-        new_weights=new_weights/np.sum(new_weights)
+        new_mu = np.array(new_mu)
+        new_V = np.array(new_V)
+        pk = np.array(pk).flatten()
+        new_weights = self.weights*pk
+        new_weights = new_weights/np.sum(new_weights)
+        
+        if self.labels is not None:
+            new_labels = self.labels[not_set_idx]
+        else:
+            new_labels = None
         
         return XDGMM(n_components=self.n_components, n_iter=self.n_iter, 
-                     method=self.method, V=new_V,mu=new_mu, 
-                     weights=new_weights)
+                     method=self.method, V=new_V, mu=new_mu, 
+                     weights=new_weights, labels=new_labels)
 
     def save_model(self, filename='xdgmm.fit'):
         """Save the parameters of the model to a file
