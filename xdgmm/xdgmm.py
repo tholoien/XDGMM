@@ -85,29 +85,29 @@ class XDGMM(BaseEstimator):
             self.read_model(filename)
         
         else:       
-		    self.n_components = n_components
-		    if n_iter != 0: self.n_iter = n_iter
-		    else:
-		        if method=='astroML': self.n_iter = 100
-		        else: self.n_iter = 10**9
-		    self.tol = tol
-		    self.random_state = random_state
-		    self.method = method
-		    self.labels = labels
-		    self.w = w
-		    
-		    # Model parameters. These are set by the fit() method but
-		    # can be set at initialization.
-		    self.V = V
-		    self.mu = mu
-		    self.weights = weights
-		    
-		    self.GMM=astroML_XDGMM(n_components,
-		                           n_iter=self.n_iter,tol=tol,
-		                           random_state=random_state)
-		    self.GMM.mu=mu
-		    self.GMM.V=V
-		    self.GMM.alpha=weights
+            self.n_components = n_components
+            if n_iter != 0: self.n_iter = n_iter
+            else:
+                if method=='astroML': self.n_iter = 100
+                else: self.n_iter = 10**9
+            self.tol = tol
+            self.random_state = random_state
+            self.method = method
+            self.labels = labels
+            self.w = w
+            
+            # Model parameters. These are set by the fit() method but
+            # can be set at initialization.
+            self.V = V
+            self.mu = mu
+            self.weights = weights
+            
+            self.GMM=astroML_XDGMM(n_components,
+                                   n_iter=self.n_iter,tol=tol,
+                                   random_state=random_state)
+            self.GMM.mu=mu
+            self.GMM.V=V
+            self.GMM.alpha=weights
 
     def fit(self, X, Xerr):
         """Fit the XD model to data
@@ -352,10 +352,10 @@ class XDGMM(BaseEstimator):
         p: array_like, shape = (n_samples, n_components)
             Probabilities.
         """
-    	if self.V is None or self.mu is None or self.weights is None:
+        if self.V is None or self.mu is None or self.weights is None:
             raise StandardError("Model parameters not set.")
-    	
-    	return self.GMM.logprob_a(X,Xerr)
+        
+        return self.GMM.logprob_a(X,Xerr)
 
     def bic(self, X, Xerr):
         """Compute Bayesian information criterion for current model and
