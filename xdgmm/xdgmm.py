@@ -517,7 +517,7 @@ class XDGMM(BaseEstimator):
         pk = []
         
         not_set_idx = np.nonzero(np.isnan(X))[0]
-        set_idx = np.nonzero(True-np.isnan(X))[0]
+        set_idx = np.nonzero(True^np.isnan(X))[0]
         x = X[set_idx]
         covars = np.copy(self.V)
         
