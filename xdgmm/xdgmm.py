@@ -103,7 +103,7 @@ class XDGMM(BaseEstimator):
             self.weights = weights
             
             self.GMM=astroML_XDGMM(n_components,
-                                   n_iter=self.n_iter,tol=tol,
+                                   max_iter=self.n_iter,tol=tol,
                                    random_state=random_state)
             self.GMM.mu=mu
             self.GMM.V=V
@@ -714,7 +714,7 @@ class XDGMM(BaseEstimator):
         self.V=V
         
         self.GMM=astroML_XDGMM(n_components=self.n_components,
-                               n_iter=self.n_iter,tol=self.tol,
+                               max_iter=self.n_iter,tol=self.tol,
                                random_state=self.random_state)
         self.GMM.mu=self.mu
         self.GMM.V=self.V
