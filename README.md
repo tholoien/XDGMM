@@ -5,7 +5,10 @@ This is a Python class for using Gaussian mixtures to do density estimation of n
 [![DOI](https://zenodo.org/badge/65572589.svg)](https://zenodo.org/badge/latestdoi/65572589)
 
 ## XDGMM Algorithms
-The code currently supports the [astroML](http://www.astroml.org/index.html) and [Bovy et al. (2011)](https://github.com/jobovy/extreme-deconvolution) algorithms for XDGMM fitting and sampling.
+The code currently supports the [astroML](http://www.astroml.org/index.html) and [Bovy et al. (2011)](https://github.com/jobovy/extreme-deconvolution) algorithms for XDGMM fitting and sampling. 
+
+### Note: 
+versions of astroML prior to May 20, 2015 contain a bug that causes an error with scoring samples. We recommend using later versions of astroML in order to avoid this.
 
 ## Machine Learning
 This class is compatible with cross validation methods from [scikit-learn](http://scikit-learn.org/stable/). See the demo for an example of this functionality.
