@@ -450,7 +450,7 @@ class XDGMM(BaseEstimator):
         mean_params = ndim * self.n_components
         n_params = int(cov_params + mean_params + self.n_components - 1)
 
-        return -2 * logprob.sum() * X.shape[0] + 2 * n_params
+        return -2 * logprob.sum() + 2 * n_params
 
     def aic_test(self, X, Xerr, param_range, no_err=False):
         """Compute Akaike information criterion for a range of numbers
@@ -485,9 +485,9 @@ class XDGMM(BaseEstimator):
             self.n_components = n_components
             self.fit(X, Xerr)
             if no_err:
-                aics = np.append(aics, self.bic(X, Xerr_zero))
+                aics = np.append(aics, self.aic(X, Xerr_zero))
             else:
-                aics = np.append(aics, self.bic(X, Xerr))
+                aics = np.append(aics, self.aic(X, Xerr))
             print "N =", n_components, ", AIC =", aics[-1]
             if aics[-1] < lowest_aic:
                 optimal_n_comp = n_components
