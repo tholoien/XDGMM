@@ -424,7 +424,76 @@ class XDGMM(BaseEstimator):
                 optimal_n_comp = n_components
                 lowest_bic = bics[-1]
         return bics, optimal_n_comp, lowest_bic
-    
+
+    def aic(self, X, Xerr):
+        """Compute Akaike information criterion for current model and
+        proposed data.
+
+        Computed in the same way as the scikit-learn GMM model computes
+            the AIC.
+
+        Parameters
+        ----------
+        X: array_like, shape = (n_samples, n_features)
+            Input data.
+        Xerr: array_like, shape = (n_samples, n_features, n_features)
+            Error on input data.
+        Returns
+        -------
+        aic: float
+            AIC for the model and data (lower is better).
+        """
+        logprob, _ = self.score_samples(X, Xerr)
+
+        ndim = self.mu.shape[1]
+        cov_params = self.n_components * ndim * (ndim + 1) / 2.
+        mean_params = ndim * self.n_components
+        n_params = int(cov_params + mean_params + self.n_components - 1)
+
+        return -2 * logprob.sum() + 2 * n_params
+
+    def aic_test(self, X, Xerr, param_range, no_err=False):
+        """Compute Akaike information criterion for a range of numbers
+        of components and proposed data.
+
+        Parameters
+        ----------
+        X: array_like, shape = (n_samples, n_features)
+            Input data.
+        Xerr: array_like, shape = (n_samples, n_features, n_features)
+            Error on input data.
+        param_range: array_like
+            Range of component values to fit
+        no_err: bool (optional)
+            Flag for whether to compute AIC using the error array
+            included or not (default = False)
+
+        Returns
+        -------
+        aics: array_like, shape = (len(param_range),)
+            AIC for each value of n_components
+        optimal_n_comp: float
+            Number of components with lowest AIC score
+        lowest_aic: float
+            Lowest AIC from the scores computed.
+        """
+        aics = np.array([])
+        lowest_aic = np.infty
+        optimal_n_comp = 0
+        if no_err: Xerr_zero = np.zeros(Xerr.shape)
+        for n_components in param_range:
+            self.n_components = n_components
+            self.fit(X, Xerr)
+            if no_err:
+                aics = np.append(aics, self.aic(X, Xerr_zero))
+            else:
+                aics = np.append(aics, self.aic(X, Xerr))
+            print "N =", n_components, ", AIC =", aics[-1]
+            if aics[-1] < lowest_aic:
+                optimal_n_comp = n_components
+                lowest_aic = aics[-1]
+        return aics, optimal_n_comp, lowest_aic
+
     def sample(self, size=1, random_state=None):
         """Sample data from the GMM model
         
