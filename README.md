@@ -21,6 +21,6 @@ This is research in progress. All content is Copyright 2016 The Authors, and our
 
 People working on this project:
 
-* Tom Holoien (Ohio State, [@tholoien](https://github.com/tholoien/empiriciSN/issues/new?body=@tholoien))
+* Tom Holoien (Carnegie Observatories, [@tholoien](https://github.com/tholoien/empiriciSN/issues/new?body=@tholoien))
 * Phil Marshall (KIPAC, [@drphilmarshall](https://github.com/tholoien/empiriciSN/issues/new?body=@drphilmarshall))
 * Risa Wechsler (KIPAC, [@rhw](https://github.com/tholoien/empiriciSN/issues/new?body=@rhw))
