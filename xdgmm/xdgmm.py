@@ -12,14 +12,15 @@ Allows conditioning of the GMM based on a subset of the parameters.
 """
 
 import numpy as np
-from scipy.stats import multivariate_normal
 import pandas as pd
+
+from scipy.stats import multivariate_normal
+from scipy.special import logsumexp
 
 from sklearn.mixture import GaussianMixture as skl_GMM
 from sklearn.base import BaseEstimator
 
 from astroML.density_estimation import XDGMM as astroML_XDGMM
-from astroML.utils import logsumexp
 
 class XDGMM(BaseEstimator):
     """Extreme Deconvolution
