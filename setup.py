@@ -11,7 +11,6 @@ setup(
     long_description=open("README.md").read(),
     package_data={"": ["README.md", "LICENSE"]},
     include_package_data=True,
-    use_2to3=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",

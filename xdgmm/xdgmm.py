@@ -199,7 +199,7 @@ class XDGMM(BaseEstimator):
             data point in X.
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         if type(X) == pd.core.frame.DataFrame: X = X.values
         
@@ -250,7 +250,7 @@ class XDGMM(BaseEstimator):
             Component memberships.
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")    
+            raise Exception("Model parameters not set.")    
         
         logprob,responsibilities=self.score_samples(X,Xerr)
         return responsibilities.argmax(axis=1)
@@ -277,7 +277,7 @@ class XDGMM(BaseEstimator):
             component in the model.
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         logprob,responsibilities=self.score_samples(X,Xerr)
         return responsibilities
@@ -305,7 +305,7 @@ class XDGMM(BaseEstimator):
             log-likelihood.
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
             
         return self.GMM.logL(X,Xerr)
         
@@ -328,7 +328,7 @@ class XDGMM(BaseEstimator):
             Score (log-likelihood).
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         logprob = self.GMM.logprob_a(X,Xerr)
         logLs = logsumexp(logprob,axis=-1)
@@ -354,7 +354,7 @@ class XDGMM(BaseEstimator):
             Probabilities.
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         return self.GMM.logprob_a(X,Xerr)
 
@@ -420,7 +420,7 @@ class XDGMM(BaseEstimator):
             self.fit(X, Xerr)
             if no_err: bics = np.append(bics, self.bic(X, Xerr_zero))
             else: bics = np.append(bics, self.bic(X, Xerr))
-            print "N =",n_components,", BIC =",bics[-1]
+            print("N =",n_components,", BIC =",bics[-1])
             if bics[-1] < lowest_bic:
                 optimal_n_comp = n_components
                 lowest_bic = bics[-1]
@@ -489,7 +489,7 @@ class XDGMM(BaseEstimator):
                 aics = np.append(aics, self.aic(X, Xerr_zero))
             else:
                 aics = np.append(aics, self.aic(X, Xerr))
-            print "N =", n_components, ", AIC =", aics[-1]
+            print("N =", n_components, ", AIC =", aics[-1])
             if aics[-1] < lowest_aic:
                 optimal_n_comp = n_components
                 lowest_aic = aics[-1]
@@ -514,7 +514,7 @@ class XDGMM(BaseEstimator):
             A sample of data points drawn from the model. 
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         return self.GMM.sample(size,random_state)
     
@@ -550,14 +550,14 @@ class XDGMM(BaseEstimator):
             n_components = self.n_components
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         if X_input is None and X_dict is None:
-            raise StandardError("X values or dictionary must be given.")
+            raise Exception("X values or dictionary must be given.")
         
         if X_input is None and X_dict is not None and \
             self.labels is None:
-            raise StandardError("Labels array is required for "
+            raise Exception("Labels array is required for "
                                  + "dictionary option to be used.")
         
         if X_dict is not None:
@@ -668,7 +668,7 @@ class XDGMM(BaseEstimator):
             Name of the file to save to. (default = 'xdgmm.fit')
         """
         if self.V is None or self.mu is None or self.weights is None:
-            raise StandardError("Model parameters not set.")
+            raise Exception("Model parameters not set.")
         
         outfile=open(filename,'w')
         outfile.write('# XDGMM Model\n')
